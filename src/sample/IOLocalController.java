@@ -5,6 +5,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
 import java.security.*;
@@ -28,8 +29,28 @@ public class IOLocalController {
 
         SecretKey passSecretKey = null;
 
-        byte[] inputBytes = new byte[0];
+        byte[] decryptedBytes = new byte[0];
+
+        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+        byte[] readIV = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".iv"));
+        byte[] readEncryptedMessage = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".aes"));
+
+        //get Secretkey
+        passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
+
+        //input iv
+        IvParameterSpec ivParams = new IvParameterSpec(readIV);
+
+        //do decryption
         try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, passSecretKey, ivParams );
+            decryptedBytes = cipher.doFinal(readEncryptedMessage);
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchPaddingException | NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+
+/*        try {
 // reading medical record + stored hash
             String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
 
@@ -62,9 +83,9 @@ public class IOLocalController {
                 System.out.println("Hash calculated value: " + Hex.toHexString(computedHashValue));
             }
         } catch (Exception e) {
-        }
+        }*/
 
-        String txt = new String(inputBytes);
+        String txt = new String(decryptedBytes);
         //System.out.println("built str txt: " + txt);
         return txt;
 
@@ -82,7 +103,7 @@ public class IOLocalController {
         SecretKey passSecretKey = null;
         byte[] encryptedMessage = null;
 
-                // hashing message w sha
+       /*         // hashing message w sha
         MessageDigest mDigest = null;
         try {
             mDigest = MessageDigest.getInstance("SHA-256", "BC");
@@ -92,7 +113,7 @@ public class IOLocalController {
             e.printStackTrace();
         }
         mDigest.update(textArea);
-        byte[] hashValue = mDigest.digest();
+        byte[] hashValue = mDigest.digest();*/
 
 
         ////encrypt mess
@@ -108,13 +129,15 @@ public class IOLocalController {
         }
         byte[] generatedIV = new byte[16];
         secureRandom.nextBytes(generatedIV);
+        IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
         //get Secretkey
         passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
 
+        //do encryption
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
-            cipher.init(Cipher.ENCRYPT_MODE, passSecretKey);
+            cipher.init(Cipher.ENCRYPT_MODE, passSecretKey, ivParams);
             encryptedMessage = cipher.doFinal(textArea);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -128,14 +151,16 @@ public class IOLocalController {
             e.printStackTrace();
         } catch (IllegalBlockSizeException e) {
             e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
         }
 
         //write files
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
         byte[] iv = Base64.toBase64String(generatedIV).getBytes();
 
-        String outFile = stringNameHashCalculated + "." + "sha256";
-        FileUtils.write(outFile, hashValue);
+      //  String outFile = stringNameHashCalculated + "." + "sha256";
+      //  FileUtils.write(outFile, hashValue);
         //System.out.println("Hashvalue: " + Hex.toHexString(hashValue));
         String ivOutFile = stringNameHashCalculated + "." + "iv";
         FileUtils.write(ivOutFile, iv);
