@@ -4,16 +4,13 @@ import javafx.collections.ObservableList;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class IOLocalController {
     private static Model model;
@@ -22,7 +19,7 @@ public class IOLocalController {
         this.model = model;
     }
 
-    static String retrieveMessage(String inputFile) throws IOException {
+    static String retrieveMessage()  {
 
         char[] nameBytes = model.getName().toCharArray();
         char[] passBytes = model.getPass().toCharArray();
@@ -34,10 +31,12 @@ public class IOLocalController {
         byte[] inputBytes = new byte[0];
         try {
 // reading medical record + stored hash
+            String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+
             System.out.println("Verifying hash of stored message..");
-            inputBytes = FileUtils.readAllBytes(inputFile + ".txt");
+            inputBytes = FileUtils.readAllBytes(stringNameHashCalculated + ".txt");
             byte[] storedHashValue =
-                    FileUtils.readAllBytes(inputFile + ".sha256");
+                    FileUtils.readAllBytes(stringNameHashCalculated + ".sha256");
 // computing new hash
             MessageDigest mDigest = null;
             try {
@@ -71,7 +70,7 @@ public class IOLocalController {
 
     }
 
-    static void storeMessage(String outputFile, ObservableList<CharSequence> paragraph) throws IOException {
+    static void storeMessage(ObservableList<CharSequence> paragraph) {
         //need to join charsequence list with newlines in between
         byte[] textArea = String.join("\n", paragraph).getBytes();
 
@@ -81,8 +80,9 @@ public class IOLocalController {
         byte[] nameSalt = model.getPassSalt();
 
         SecretKey passSecretKey = null;
+        byte[] encryptedMessage = null;
 
-        // hashing
+                // hashing message w sha
         MessageDigest mDigest = null;
         try {
             mDigest = MessageDigest.getInstance("SHA-256", "BC");
@@ -94,13 +94,54 @@ public class IOLocalController {
         mDigest.update(textArea);
         byte[] hashValue = mDigest.digest();
 
-        String outFile = outputFile + "." + "sha256";
+
+        ////encrypt mess
+
+        //get random iv
+        SecureRandom secureRandom = null;
+        try {
+            secureRandom = SecureRandom.getInstance("DEFAULT", "BC");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+        byte[] generatedIV = new byte[16];
+        secureRandom.nextBytes(generatedIV);
+
+        //get Secretkey
+        passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, passSecretKey);
+            encryptedMessage = cipher.doFinal(textArea);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+        //write files
+        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+        byte[] iv = Base64.toBase64String(generatedIV).getBytes();
+
+        String outFile = stringNameHashCalculated + "." + "sha256";
         FileUtils.write(outFile, hashValue);
-        System.out.println("Hashvalue: " + Hex.toHexString(hashValue));
+        //System.out.println("Hashvalue: " + Hex.toHexString(hashValue));
+        String ivOutFile = stringNameHashCalculated + "." + "iv";
+        FileUtils.write(ivOutFile, iv);
 
-        String outTextArea = outputFile + "." + "txt";
-
-        FileUtils.write(outTextArea, textArea);
+        String outTextArea = stringNameHashCalculated + "." + "aes";
+        FileUtils.write(outTextArea,  Base64.toBase64String(Objects.requireNonNull(encryptedMessage)).getBytes());
 
     }
 
@@ -145,8 +186,11 @@ public class IOLocalController {
             //  System.out.println(stringNameSaltRetrieved);
             //  System.out.println(stringPassHashRetrieved);
 
-            stringNameHashCalculated = Base64.toBase64String(getPBKDHashKey(nameBytes, nameSaltRetrieved).getEncoded());
-            stringPassHashCalculated = Base64.toBase64String(getPBKDHashKey(passBytes, passSaltRetrieved).getEncoded());
+            stringNameHashCalculated = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSaltRetrieved)).getEncoded());
+            stringPassHashCalculated = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(passBytes, passSaltRetrieved)).getEncoded());
+
+          //  stringNameHashCalculated = Hex.toHexString(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSaltRetrieved)).getEncoded());
+           // stringPassHashCalculated = Hex.toHexString(Objects.requireNonNull(getPBKDHashKey(passBytes, passSaltRetrieved)).getEncoded());
 
             System.out.println("name hash ret  " + stringNameHashRetrieved);
             System.out.println("name hash calc " + Hex.toHexString(stringNameHashCalculated.getBytes()));
@@ -185,6 +229,7 @@ public class IOLocalController {
         //SecretKey passSecretKey = null;
         //SecretKey nameSecretKey = null;
 
+        //get random salts
         try {
             SecureRandom secureRandom = SecureRandom.getInstance("DEFAULT", "BC");
             passSalt = new byte[32];
@@ -205,15 +250,18 @@ public class IOLocalController {
         //hash pw, name
         if (passSalt != null && nameSalt != null) {
             //nameSecretKey = getPBKDHashKey(nameBytes, nameSalt);
-            stringNameHash = Base64.toBase64String(getPBKDHashKey(nameBytes, nameSalt).getEncoded());
-            stringPassHash = Base64.toBase64String(getPBKDHashKey(passBytes, passSalt).getEncoded());
+            stringNameHash = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded());
+            stringPassHash = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt)).getEncoded());
+
+          //  stringNameHash =  Hex.toHexString(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded());
+           // stringPassHash =  Hex.toHexString(Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt)).getEncoded());
 
             //System.out.println("passkey hashvalue: " + stringPassHash);
             //System.out.println("passkey hashvalue: " + stringNameHash);
             //System.out.println("passkeyhexvalue: " + Hex.toHexString(stringPassHash.getBytes()));
         }
 
-        String outFile = Hex.toHexString(stringNameHash.getBytes()) + "." + "acc";
+        String outFile = Hex.toHexString(Objects.requireNonNull(stringNameHash).getBytes()) + "." + "acc";
         String outString = Hex.toHexString(passSalt) + "," + Hex.toHexString(nameSalt) + "," + Hex.toHexString(stringPassHash.getBytes());
 
         //System.out.println("hex dehex: " + MessageDigest.isEqual(nameSalt, Hex.decode(Hex.toHexString(nameSalt))));
@@ -223,8 +271,11 @@ public class IOLocalController {
     }
 
     private static SecretKey getPBKDHashKey(char[] chars, byte[] salt) {
+        var iterations = 5000; //hardcoded for now, could be settings
+        var keyLen = 128;
+
         try {
-            PBEKeySpec keySpec = new PBEKeySpec(chars, salt, 5000, 128);
+            PBEKeySpec keySpec = new PBEKeySpec(chars, salt, iterations, keyLen);
 // specifying data for key derivation
             SecretKeyFactory factory =
                     SecretKeyFactory.getInstance("PBKDF2WITHHMACSHA256", "BC");

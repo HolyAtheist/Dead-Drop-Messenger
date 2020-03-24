@@ -208,11 +208,9 @@ public class View {
                 }
 
                 ObservableList<CharSequence> paragraph = messField.getParagraphs();
-                try {
-                    IOLocalController.storeMessage("textArea", paragraph);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+              //  try {
+                    IOLocalController.storeMessage(paragraph);
+              //  }
 
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
@@ -221,11 +219,11 @@ public class View {
         retrieveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                try {
-                    messField.setText(IOLocalController.retrieveMessage("textArea"));
-                } catch (IOException exc) {
-                    exc.printStackTrace();
-                }
+             //   try {
+                    messField.setText(IOLocalController.retrieveMessage());
+              //  } //catch (IOException exc) {
+                   // exc.printStackTrace();
+               // }
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
         });
