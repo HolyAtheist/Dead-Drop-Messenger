@@ -15,9 +15,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Window;
 
-import java.io.IOException;
-import java.security.spec.InvalidKeySpecException;
-
 public class View {
     private static GridPane gridPane;
     private static TextArea messField = new TextArea();
@@ -103,7 +100,7 @@ public class View {
         gridPane.add(passwordField, 1, 3);
         passwordField.textProperty().addListener((obs, oldText, newText) -> controller.updatePass(newText));
 
-        // Add Submit Button
+        // Add login Button
         Button loginButton = new Button("Login");
         loginButton.setPrefHeight(40);
         //loginButton.setDefaultButton(true);
@@ -124,6 +121,7 @@ public class View {
         createNewAccountButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                //todo: check password quality
                 if (nameField.getText().isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
                     return;
@@ -133,8 +131,9 @@ public class View {
                     return;
                 }
 
+                //call storeAccount and go to next scene
+                //todo: storeAccount() should return true if successfully created .acc files
                 ioLocalController.storeAccount();
-
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
                 gridPane.getChildren().clear();
                 messageSceneElements(gridPane);
@@ -154,6 +153,7 @@ public class View {
                     return;
                 }
 
+                //if found matching account login/password then go to next scene
                 if (ioLocalController.retrieveAccount()) {
                     //showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Login", "Welcome " + nameField.getText());
                     gridPane.getChildren().clear();
@@ -171,17 +171,16 @@ public class View {
         GridPane.setHalignment(headerLabel, HPos.CENTER);
         GridPane.setMargin(headerLabel, new Insets(20, 0, 20, 0));
 
-        // Add Name L abel
+        // Add message Label
         Label nameLabel = new Label("Message : ");
         gridPane.add(nameLabel, 0, 1);
 
-        // Add Name Text Field
-
+        // Add message Text Field
         messField.setPrefHeight(200);
         messField.setWrapText(true);
         gridPane.add(messField, 1, 1);
 
-        // Add Submit Button
+        // Add retrieve Button
         Button retrieveButton = new Button("Retrieve");
         retrieveButton.setPrefHeight(40);
         // retrieveButton.setDefaultButton(true);
@@ -190,7 +189,7 @@ public class View {
         //GridPane.setHalignment(retrieveButton, HPos.CENTER);
         GridPane.setMargin(retrieveButton, new Insets(20, 0, 20, 0));
 
-        // Add Submit Button
+        // Add store Button
         Button storeButton = new Button("Store");
         storeButton.setPrefHeight(40);
         //storeButton.setDefaultButton(true);
@@ -207,11 +206,9 @@ public class View {
                     return;
                 }
 
+                //call encrypt and save message
                 ObservableList<CharSequence> paragraph = messField.getParagraphs();
-              //  try {
-                    IOLocalController.storeMessage(paragraph);
-              //  }
-
+                IOLocalController.storeMessage(paragraph);
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
@@ -219,12 +216,9 @@ public class View {
         retrieveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-             //   try {
-                    messField.setText(IOLocalController.retrieveMessage());
-              //  } //catch (IOException exc) {
-                   // exc.printStackTrace();
-               // }
-                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
+                //call retrieve and decrypt message
+                messField.setText(IOLocalController.retrieveMessage());
+                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
         });
     }

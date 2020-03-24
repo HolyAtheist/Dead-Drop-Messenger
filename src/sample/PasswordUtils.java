@@ -4,7 +4,7 @@ import java.io.Console;
 import java.util.Scanner;
 
 public class PasswordUtils {
-
+//helper class as given by niels, will probably be removed
     // This utility tries to use Console.readPassword()
     // which hides the password typed by the user (because echoing is disabled).
     // Since users of IntelliJ may not connect to the Console,

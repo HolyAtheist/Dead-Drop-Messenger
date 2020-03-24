@@ -8,7 +8,7 @@ public class Controller {
     }
 
     public void updateName(String name) {
-        System.out.println("updating model name: " + name);
+        //System.out.println("updating model name: " + name);
         model.setName(name);
     }
 
