@@ -13,9 +13,9 @@ public class Main extends Application {
         Model model = new Model();
         Controller controller = new Controller(model);
         IOLocalController ioLocalController = new IOLocalController(model);
-        IONonLocalController ioNonLocalController = new IONonLocalController(model);
+        IODeadDropController ioDeadDropController = new IODeadDropController(model);
         //todo: have just one controller or several by proper method
-        View view = new View(controller, model);
+        View view = new View(controller, ioLocalController, ioDeadDropController, model);
 
         primaryStage.setTitle("Startup Screen");
 

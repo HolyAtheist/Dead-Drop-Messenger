@@ -6,9 +6,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
 public class IOLocalController {
@@ -30,12 +28,12 @@ public class IOLocalController {
         byte[] decryptedBytes = new byte[0];
 
         //read .iv and .aes files in current account
-        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
         byte[] readIV = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".iv"));
         byte[] readEncryptedMessage = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".aes"));
 
         //get SecretKey
-        passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
+        passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         //input iv
         IvParameterSpec ivParams = new IvParameterSpec(readIV);
@@ -71,19 +69,11 @@ public class IOLocalController {
         ////encrypt message
 
         //get random iv
-        SecureRandom secureRandom = null;
-        try {
-            secureRandom = SecureRandom.getInstance("DEFAULT", "BC");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            e.printStackTrace();
-        }
-        byte[] generatedIV = new byte[16];
-        assert secureRandom != null;
-        secureRandom.nextBytes(generatedIV);
+        byte[] generatedIV = CryptUtils.generateSecureIV();
         IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
         //get SecretKey
-        passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
+        passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         //do encryption
         try {
@@ -95,7 +85,7 @@ public class IOLocalController {
         }
 
         //prepare data and write files .iv and encrypted .aes
-        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
         byte[] iv = Base64.toBase64String(generatedIV).getBytes();
 
         String ivOutFile = stringNameHashCalculated + "." + "iv";
@@ -104,6 +94,8 @@ public class IOLocalController {
         String outTextArea = stringNameHashCalculated + "." + "aes";
         FileUtils.write(outTextArea, Base64.toBase64String(Objects.requireNonNull(encryptedMessage)).getBytes());
     }
+
+
 
     static boolean retrieveAccount() {
         //try to find a matching account
@@ -145,8 +137,8 @@ public class IOLocalController {
             passSaltRetrieved = Hex.decode(stringPassSaltRetrieved);
             nameSaltRetrieved = Hex.decode(stringNameSaltRetrieved);
 
-            stringNameHashCalculated = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSaltRetrieved)).getEncoded());
-            stringPassHashCalculated = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(passBytes, passSaltRetrieved)).getEncoded());
+            stringNameHashCalculated = Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSaltRetrieved)).getEncoded());
+            stringPassHashCalculated = Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSaltRetrieved)).getEncoded());
 
             //compare hashes of name and pass from login with current .acc file
             if (MessageDigest
@@ -192,8 +184,8 @@ public class IOLocalController {
 
         //hash password, name
         if (passSalt != null && nameSalt != null) {
-            stringNameHash = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded());
-            stringPassHash = Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt)).getEncoded());
+            stringNameHash = Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded());
+            stringPassHash = Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt)).getEncoded());
         }
 
         //build .acc account file and write it using hashed name as filename
@@ -203,29 +195,6 @@ public class IOLocalController {
         FileUtils.write(outFile, accountData);
     }
 
-    private static SecretKey getPBKDHashKey(char[] chars, byte[] salt) {
-        //simple method for hashing name and password
-        //using Password-Based Key Derivation Function 2
-        //basically as written on the slides
 
-        var iterations = 5000; //hardcoded for now, could be settings
-        var keyLen = 128;
-
-        try {
-            PBEKeySpec keySpec = new PBEKeySpec(chars, salt, iterations, keyLen);
-// specifying data for key derivation
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WITHHMACSHA256", "BC");
-// specifying algorithm for key derivation
-            SecretKey key = factory.generateSecret(keySpec);
-// the actual key derivation with iterated hashing
-// key may now be passed to Cipher.init() (which accepts instances of interface SecretKey)
-            if (key != null) {
-                return key;
-            }
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 }

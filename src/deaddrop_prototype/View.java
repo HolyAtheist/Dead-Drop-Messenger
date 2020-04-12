@@ -6,6 +6,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
@@ -18,19 +19,25 @@ import javafx.stage.Window;
 public class View {
     private static GridPane gridPane;
     private static TextArea messField = new TextArea();
-    private static TextArea statusField = new TextArea();
+    //private static TextArea statusField = new TextArea();
     private static TextField nameField = new TextField();
     private static PasswordField passwordField = new PasswordField();
 
     private static Controller controller;
     private static IOLocalController ioLocalController;
-    private static IONonLocalController ioNonLocalController;
+    private static IODeadDropController ioDeadDropController;
+
+    private static TextField protocolField= new TextField();
+    private static TextField baseUrlField= new TextField();
+    private static TextField idUrlField= new TextField();
+
     private Model model;
 
-    public View(Controller controller, Model model) {
+    public View(Controller controller1, IOLocalController controller2, IODeadDropController controller3, Model model) {
 
-        this.controller = controller;
-        this.ioLocalController = ioLocalController;
+        this.controller = controller1;
+        this.ioLocalController = controller2;
+        this.ioDeadDropController = controller3;
         this.model = model;
 
         GridPane gridPane = createDefaultFormPane();
@@ -177,9 +184,12 @@ public class View {
         Label nameLabel = new Label("Message : ");
         gridPane.add(nameLabel, 0, 1);
 
-        // Add message Label
+        // Add status Label
         Label statusLabel = new Label("Status : ");
         gridPane.add(statusLabel, 0, 6);
+        Label statusLabel2 = new Label("");
+        gridPane.add(statusLabel2, 1, 6);
+        //statusLabel2.textProperty()
 
         // Add message Text Field
         messField.setPrefHeight(200);
@@ -188,9 +198,9 @@ public class View {
         messField.textProperty().addListener((obs, oldText, newText) -> controller.updateMess(newText));
 
         // Add status message Text Field
-        statusField.setPrefHeight(200);
-        statusField.setWrapText(true);
-        gridPane.add(statusField, 1, 6);
+        //statusField.setPrefHeight(30);
+        //statusField.setWrapText(true);
+        //gridPane.add(statusField, 1, 6);
 
         // Add retrieve Button
         Button retrieveButton = new Button("Retrieve locally");
@@ -255,8 +265,8 @@ public class View {
                 //call encrypt and save message
                 //ObservableList<CharSequence> paragraph = messField.getParagraphs();
                 //IONonLocalController.storeMessage(paragraph);
-                controller.storeMessageDeadDrop();
-                statusField.setText(controller.getStatus());
+                ioDeadDropController.storeMessageDeadDrop();
+                statusLabel2.setText(controller.getStatus());
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
@@ -276,9 +286,9 @@ public class View {
                 //call retrieve and decrypt message
                 //messField.setText(IONonLocalController.retrieveMessage());
                 //IONonLocalController.retrieveMessage();
-                controller.retrieveMessageDeadDrop();
+                ioDeadDropController.retrieveMessageDeadDrop();
                 messField.setText(controller.getMess());
-                statusField.setText(controller.getStatus());
+                statusLabel2.setText(controller.getStatus());
 
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
@@ -287,7 +297,109 @@ public class View {
     }
 
 
+    public static void configSceneElements(GridPane gridPane) {
+        // Add Header
+        Label headerLabel = new Label("Dead Drop Configuration");
+        headerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        gridPane.add(headerLabel, 0, 0, 2, 1);
+        GridPane.setHalignment(headerLabel, HPos.CENTER);
+        GridPane.setMargin(headerLabel, new Insets(20, 0, 20, 0));
 
+        // Add Name Label
+        Label protocolLabel = new Label("Protocol : ");
+        gridPane.add(protocolLabel, 0, 1);
+
+        // Add Name Text Field
+        //TextField nameField = new TextField();
+        protocolField.setPrefHeight(40);
+        gridPane.add(protocolField, 1, 1);
+        protocolField.textProperty().addListener((obs, oldText, newText) -> controller.updateProtocol(newText));
+
+
+        // Add Name Label
+        Label baseUrlLabel = new Label("Protocol : ");
+        gridPane.add(baseUrlLabel, 0, 1);
+
+        // Add Name Text Field
+        //TextField nameField = new TextField();
+        baseUrlField.setPrefHeight(40);
+        gridPane.add(baseUrlField, 1, 1);
+        baseUrlField.textProperty().addListener((obs, oldText, newText) -> controller.updateBaseUrl(newText));
+
+
+        // Add Name Label
+        Label idUrlLabel = new Label("Protocol : ");
+        gridPane.add(idUrlLabel, 0, 1);
+
+        // Add Name Text Field
+        //TextField nameField = new TextField();
+        idUrlField.setPrefHeight(40);
+        gridPane.add(idUrlField, 1, 1);
+        idUrlField.textProperty().addListener((obs, oldText, newText) -> controller.updateIdUrl(newText));
+
+
+        // Add login Button
+        Button loginButton = new Button("Login");
+        loginButton.setPrefHeight(40);
+        //loginButton.setDefaultButton(true);
+        loginButton.setPrefWidth(100);
+        gridPane.add(loginButton, 1, 4, 2, 1);
+        //GridPane.setHalignment(loginButton, HPos.CENTER);
+        GridPane.setMargin(loginButton, new Insets(20, 0, 20, 0));
+
+        // Add new account Button
+        Button createNewAccountButton = new Button("Create New");
+        createNewAccountButton.setPrefHeight(40);
+        //createNewAccountButton.setDefaultButton(true);
+        createNewAccountButton.setPrefWidth(100);
+        gridPane.add(createNewAccountButton, 0, 4, 2, 1);
+        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
+        GridPane.setMargin(createNewAccountButton, new Insets(20, 0, 20, 0));
+
+        createNewAccountButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //todo: check password quality
+                if (nameField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
+                    return;
+                }
+                if (passwordField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
+                    return;
+                }
+
+                //call storeAccount and go to next scene
+                //todo: storeAccount() should return true if successfully created .acc files
+                ioLocalController.storeAccount();
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
+                gridPane.getChildren().clear();
+                messageSceneElements(gridPane);
+
+            }
+        });
+
+        loginButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (nameField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
+                    return;
+                }
+                if (passwordField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
+                    return;
+                }
+
+                //if found matching account login/password then go to next scene
+                if (ioLocalController.retrieveAccount()) {
+                    //showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Login", "Welcome " + nameField.getText());
+                    gridPane.getChildren().clear();
+                    messageSceneElements(gridPane);
+                }
+            }
+        });
+    }
 
     public static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {
         Alert alert = new Alert(alertType);

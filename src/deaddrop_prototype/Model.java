@@ -3,8 +3,6 @@ package deaddrop_prototype;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import java.util.List;
-
 public class Model {
 
     private StringProperty name = new SimpleStringProperty();
@@ -61,6 +59,9 @@ public class Model {
     }
     public final String getIdUrl() { return this.idUrlProperty().get(); }
     public final void setIdUrl(String name) { this.idUrlProperty().set(name); }
+
+    //encryption method
+    //iterations
     ///
 
 
