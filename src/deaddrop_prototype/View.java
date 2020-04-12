@@ -1,4 +1,4 @@
-package sample;
+package deaddrop_prototype;
 
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,6 +23,7 @@ public class View {
 
     private static Controller controller;
     private static IOLocalController ioLocalController;
+    private static IONonLocalController ioNonLocalController;
     private Model model;
 
     public View(Controller controller, Model model) {
@@ -181,7 +182,7 @@ public class View {
         gridPane.add(messField, 1, 1);
 
         // Add retrieve Button
-        Button retrieveButton = new Button("Retrieve");
+        Button retrieveButton = new Button("Retrieve locally");
         retrieveButton.setPrefHeight(40);
         // retrieveButton.setDefaultButton(true);
         retrieveButton.setPrefWidth(100);
@@ -189,14 +190,33 @@ public class View {
         //GridPane.setHalignment(retrieveButton, HPos.CENTER);
         GridPane.setMargin(retrieveButton, new Insets(20, 0, 20, 0));
 
+        // Add retrieve Button
+        Button retrieveDeadDropButton = new Button("Retrieve from dead drop");
+        retrieveDeadDropButton.setPrefHeight(40);
+        // retrieveButton.setDefaultButton(true);
+        retrieveDeadDropButton.setPrefWidth(150);
+        gridPane.add(retrieveDeadDropButton, 0, 5, 2, 1);
+        //GridPane.setHalignment(retrieveButton, HPos.CENTER);
+        GridPane.setMargin(retrieveDeadDropButton, new Insets(20, 0, 20, 0));
+
         // Add store Button
-        Button storeButton = new Button("Store");
+        Button storeButton = new Button("Store locally");
         storeButton.setPrefHeight(40);
         //storeButton.setDefaultButton(true);
         storeButton.setPrefWidth(100);
         gridPane.add(storeButton, 1, 4, 2, 1);
         //GridPane.setHalignment(storeButton, HPos.CENTER);
         GridPane.setMargin(storeButton, new Insets(20, 0, 20, 0));
+
+        // Add store Button
+        Button storeDeadDropButton = new Button("Store in dead drop");
+        storeDeadDropButton.setPrefHeight(40);
+        //storeButton.setDefaultButton(true);
+        storeDeadDropButton.setPrefWidth(150);
+        gridPane.add(storeDeadDropButton, 1, 5, 2, 1);
+        //GridPane.setHalignment(storeButton, HPos.CENTER);
+        GridPane.setMargin(storeDeadDropButton, new Insets(20, 0, 20, 0));
+
 
         storeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -213,15 +233,43 @@ public class View {
             }
         });
 
+        storeDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (messField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
+                    return;
+                }
+
+                //call encrypt and save message
+                ObservableList<CharSequence> paragraph = messField.getParagraphs();
+                IONonLocalController.storeMessage(paragraph);
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
+            }
+        });
+
         retrieveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 //call retrieve and decrypt message
                 messField.setText(IOLocalController.retrieveMessage());
-                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
         });
+
+        retrieveDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //call retrieve and decrypt message
+                messField.setText(IONonLocalController.retrieveMessage());
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
+            }
+        });
+
     }
+
+
+
 
     public static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {
         Alert alert = new Alert(alertType);

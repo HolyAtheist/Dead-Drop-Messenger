@@ -1,4 +1,4 @@
-package sample;
+package deaddrop_prototype;
 
 public class Controller {
     private final Model model ;
