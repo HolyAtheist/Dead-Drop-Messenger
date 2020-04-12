@@ -18,6 +18,7 @@ import javafx.stage.Window;
 public class View {
     private static GridPane gridPane;
     private static TextArea messField = new TextArea();
+    private static TextArea statusField = new TextArea();
     private static TextField nameField = new TextField();
     private static PasswordField passwordField = new PasswordField();
 
@@ -176,10 +177,20 @@ public class View {
         Label nameLabel = new Label("Message : ");
         gridPane.add(nameLabel, 0, 1);
 
+        // Add message Label
+        Label statusLabel = new Label("Status : ");
+        gridPane.add(statusLabel, 0, 6);
+
         // Add message Text Field
         messField.setPrefHeight(200);
         messField.setWrapText(true);
         gridPane.add(messField, 1, 1);
+        messField.textProperty().addListener((obs, oldText, newText) -> controller.updateMess(newText));
+
+        // Add status message Text Field
+        statusField.setPrefHeight(200);
+        statusField.setWrapText(true);
+        gridPane.add(statusField, 1, 6);
 
         // Add retrieve Button
         Button retrieveButton = new Button("Retrieve locally");
@@ -242,8 +253,10 @@ public class View {
                 }
 
                 //call encrypt and save message
-                ObservableList<CharSequence> paragraph = messField.getParagraphs();
-                IONonLocalController.storeMessage(paragraph);
+                //ObservableList<CharSequence> paragraph = messField.getParagraphs();
+                //IONonLocalController.storeMessage(paragraph);
+                controller.storeMessageDeadDrop();
+                statusField.setText(controller.getStatus());
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
@@ -261,7 +274,12 @@ public class View {
             @Override
             public void handle(ActionEvent event) {
                 //call retrieve and decrypt message
-                messField.setText(IONonLocalController.retrieveMessage());
+                //messField.setText(IONonLocalController.retrieveMessage());
+                //IONonLocalController.retrieveMessage();
+                controller.retrieveMessageDeadDrop();
+                messField.setText(controller.getMess());
+                statusField.setText(controller.getStatus());
+
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
         });

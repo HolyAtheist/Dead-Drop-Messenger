@@ -23,12 +23,13 @@ import java.util.Objects;
 
 public class IONonLocalController {
     private static Model model;
+    private static Controller controller;
 
     public IONonLocalController(Model model) {
         this.model = model;
     }
 
-    static String retrieveMessage() {
+    static void retrieveMessage() {
         //load and decrypt message for current account
 
         char[] nameBytes = model.getName().toCharArray();
@@ -39,23 +40,17 @@ public class IONonLocalController {
         SecretKey passSecretKey;
         byte[] decryptedBytes = new byte[0];
 
+        //base url https://jsonblob.com/api/jsonBlob/
+
+        String protocol = "https://";
+        String baseUrl = "jsonblob.com/api/jsonBlob/";
+        String idUrl = "23990876-7cc3-11ea-8070-5741ae0a9329";
 
         Client client = ClientBuilder.newClient();
-        //query params: ?q=Turku&cnt=10&mode=json&units=metric
-        //https://dog.ceo/api/breeds/list/all
-        //http://svatky.adresa.info/json?date=0808
-
-        //https://delighted.com/docs/api
-        //key CCqqD4LC3E9lD3iNJB01NzbHtaPO7MiF
-
-
-        WebTarget target = client.target("https://jsonblob.com/api/jsonBlob/23990876-7cc3-11ea-8070-5741ae0a9329");
-               // .queryParam("date", "0808");
-                //.queryParam("mode", "json")
-               // .queryParam("units", "metric");
+        WebTarget target = client.target(protocol+baseUrl+idUrl); //build url
         String stringtest = target.toString();
-        Response req = target.request(MediaType.APPLICATION_JSON_TYPE)
-                .get();
+        Response req = target.request(MediaType.APPLICATION_JSON_TYPE).get(); //GET the url
+
         int status = req.getStatus();
         JsonObject str2 = req.readEntity(JsonObject.class); //get response json data
         System.out.println(stringtest);
@@ -77,7 +72,7 @@ public class IONonLocalController {
 
         byte[] readIV = Base64.decode(iv);
         byte[] readEncryptedMessage = Base64.decode(aes);
-        
+
         //get SecretKey
         passSecretKey = Objects.requireNonNull(getPBKDHashKey(passBytes, passSalt));
 
@@ -94,8 +89,10 @@ public class IONonLocalController {
         }
 
         //return decrypted message
-        return new String(decryptedBytes);
+        //return new String(decryptedBytes);
 
+        controller.updateMess(new String(decryptedBytes));
+        controller.updateStatus(String.valueOf(req));
     }
 
     static void storeMessage(ObservableList<CharSequence> paragraph) {
@@ -152,14 +149,6 @@ public class IONonLocalController {
                 .add("name", stringNameHashCalculated)
                 .add("iv", Base64.toBase64String(generatedIV))
                 .add("aes", Base64.toBase64String(Objects.requireNonNull(encryptedMessage))).build();
-
-       // List s = new ArrayList();
-      //  s.add("Test First Name !!!");
-      //  s.add("Test Last Name!!!");
-
-
-       // GenericEntity<List<?>> genericEntity = new GenericEntity<List<?>> (s)  {};
-       // Response.status(Response.Status.BAD_REQUEST).entity(genericEntity).build();
 
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target("https://jsonblob.com/api/jsonBlob/23990876-7cc3-11ea-8070-5741ae0a9329");
