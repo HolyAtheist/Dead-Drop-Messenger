@@ -23,7 +23,8 @@ public class CryptUtils {
         return generatedIV;
     }
 
-    protected static byte[] crypt(byte[] text, SecretKey passSecretKey, byte[] cryptedMessage, IvParameterSpec ivParams, int cryptMode) {
+    protected static byte[] crypt(byte[] text, SecretKey passSecretKey, IvParameterSpec ivParams, int cryptMode) {
+        byte[] cryptedMessage = new byte[0];
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
             cipher.init(cryptMode, passSecretKey, ivParams);

@@ -60,6 +60,13 @@ public class Model {
     public final String getIdUrl() { return this.idUrlProperty().get(); }
     public final void setIdUrl(String name) { this.idUrlProperty().set(name); }
 
+    private StringProperty idHeader = new SimpleStringProperty();
+    public final StringProperty idHeaderProperty() {
+        return this.idHeader;
+    }
+    public final String getIdHeader() { return this.idHeaderProperty().get(); }
+    public final void setIdHeader(String name) { this.idHeaderProperty().set(name); }
+
     //encryption method
     //iterations
     ///

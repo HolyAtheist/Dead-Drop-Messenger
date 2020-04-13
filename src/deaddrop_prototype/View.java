@@ -30,6 +30,7 @@ public class View {
     private static TextField protocolField= new TextField();
     private static TextField baseUrlField= new TextField();
     private static TextField idUrlField= new TextField();
+    private static TextField idHeaderField= new TextField();
 
     private Model model;
 
@@ -350,6 +351,14 @@ public class View {
         idUrlField.setText(controller.getIdUrl());
         idUrlField.textProperty().addListener((obs, oldText, newText) -> controller.updateIdUrl(newText));
 
+        // Add id header Label and field
+        Label idHeaderLabel = new Label("ID Header : ");
+        gridPane.add(idHeaderLabel, 2, 3);
+        idHeaderField.setPrefHeight(40);
+        gridPane.add(idHeaderField, 3, 3);
+        idHeaderField.setText(controller.getIdHeader());
+        idHeaderField.textProperty().addListener((obs, oldText, newText) -> controller.updateIdHeader(newText));
+
         // Add get new id Button
         Button getNewIdButton = new Button("Get New");
         getNewIdButton.setPrefHeight(40);
@@ -408,7 +417,8 @@ public class View {
 
                 //call storeAccount and go to next scene
                 //todo: storeAccount() should return true if successfully created .acc files*/
-
+                ioDeadDropController.getNewId();
+                idUrlField.setText(controller.getIdUrl());
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
                 //gridPane.getChildren().clear();
                 //messageSceneElements(gridPane);

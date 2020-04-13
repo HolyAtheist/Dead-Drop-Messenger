@@ -43,7 +43,7 @@ public class IOLocalController {
         IvParameterSpec ivParams = new IvParameterSpec(readIV);
 
         //do decryption
-        decryptedBytes = CryptUtils.crypt(readEncryptedMessage, passSecretKey, decryptedBytes, ivParams, Cipher.DECRYPT_MODE);
+        decryptedBytes = CryptUtils.crypt(readEncryptedMessage, passSecretKey, ivParams, Cipher.DECRYPT_MODE);
 
         //return decrypted message
         return new String(decryptedBytes);
@@ -74,7 +74,7 @@ public class IOLocalController {
         passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         //do encryption
-        encryptedMessage = CryptUtils.crypt(textArea, passSecretKey, encryptedMessage, ivParams, Cipher.ENCRYPT_MODE);
+        encryptedMessage = CryptUtils.crypt(textArea, passSecretKey, ivParams, Cipher.ENCRYPT_MODE);
 
         //prepare data and write files .iv and encrypted .aes
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
@@ -201,7 +201,8 @@ public class IOLocalController {
         JsonObject jsonConfig = Json.createObjectBuilder()
                 .add("protocol", Base64.toBase64String(model.getProtocol().getBytes()))
                 .add("baseurl", Base64.toBase64String(model.getBaseUrl().getBytes()))
-                .add("idurl", Base64.toBase64String(model.getIdUrl().getBytes())).build();
+                .add("idurl", Base64.toBase64String(model.getIdUrl().getBytes()))
+                .add("idheader", Base64.toBase64String(model.getIdHeader().getBytes())).build();
 
 
         ////encrypt message
@@ -216,7 +217,7 @@ public class IOLocalController {
         byte[] data = jsonConfig.toString().getBytes();
 
         //do encryption
-        encryptedMessage = CryptUtils.crypt(data, passSecretKey, encryptedMessage, ivParams, Cipher.ENCRYPT_MODE);
+        encryptedMessage = CryptUtils.crypt(data, passSecretKey, ivParams, Cipher.ENCRYPT_MODE);
 
         //prepare data and write files .iv and encrypted .aes
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
@@ -261,7 +262,7 @@ public class IOLocalController {
             IvParameterSpec ivParams = new IvParameterSpec(readIV);
 
             //try to do decryption
-            decryptedBytes = CryptUtils.crypt(readEncryptedMessage, passSecretKey, decryptedBytes, ivParams, Cipher.DECRYPT_MODE);
+            decryptedBytes = CryptUtils.crypt(readEncryptedMessage, passSecretKey, ivParams, Cipher.DECRYPT_MODE);
 
             String json = new String(decryptedBytes);
 
@@ -272,10 +273,12 @@ public class IOLocalController {
             String protocol = new String(Base64.decode(object.getString("protocol")));
             String baseUrl = new String(Base64.decode(object.getString("baseurl")));
             String idUrl = new String(Base64.decode(object.getString("idurl")));
+            String idheader = new String(Base64.decode(object.getString("idheader")));
 
             model.setProtocol(protocol);
             model.setBaseUrl(baseUrl);
             model.setIdUrl(idUrl);
+            model.setIdHeader(idheader);
         }
 
     }
