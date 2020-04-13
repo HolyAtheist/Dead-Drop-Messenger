@@ -1,15 +1,14 @@
 package deaddrop_prototype;
 
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
 public class CryptUtils {
+    //helper class for de/encrypt
 
     protected static byte[] generateSecureIV() {
         SecureRandom secureRandom = null;
@@ -22,6 +21,17 @@ public class CryptUtils {
         assert secureRandom != null;
         secureRandom.nextBytes(generatedIV);
         return generatedIV;
+    }
+
+    protected static byte[] crypt(byte[] text, SecretKey passSecretKey, byte[] cryptedMessage, IvParameterSpec ivParams, int cryptMode) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+            cipher.init(cryptMode, passSecretKey, ivParams);
+            cryptedMessage = cipher.doFinal(text);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+        return cryptedMessage;
     }
 
     protected static SecretKey getPBKDHashKey(char[] chars, byte[] salt) {

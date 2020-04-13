@@ -43,4 +43,16 @@ public class Controller {
     public void updateIdUrl(String newText) {
         model.setIdUrl(newText);
     }
+
+    public String getProtocol() {
+        return model.getProtocol();
+    }
+
+    public String getBaseUrl() {
+        return model.getBaseUrl();
+    }
+
+    public String getIdUrl() {
+        return model.getIdUrl();
+    }
 }

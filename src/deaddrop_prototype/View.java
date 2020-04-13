@@ -165,6 +165,7 @@ public class View {
                 //if found matching account login/password then go to next scene
                 if (ioLocalController.retrieveAccount()) {
                     //showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Login", "Welcome " + nameField.getText());
+                    ioLocalController.retrieveConfig();
                     gridPane.getChildren().clear();
                     messageSceneElements(gridPane);
                 }
@@ -196,11 +197,6 @@ public class View {
         messField.setWrapText(true);
         gridPane.add(messField, 1, 1);
         messField.textProperty().addListener((obs, oldText, newText) -> controller.updateMess(newText));
-
-        // Add status message Text Field
-        //statusField.setPrefHeight(30);
-        //statusField.setWrapText(true);
-        //gridPane.add(statusField, 1, 6);
 
         // Add retrieve Button
         Button retrieveButton = new Button("Retrieve locally");
@@ -237,6 +233,31 @@ public class View {
         gridPane.add(storeDeadDropButton, 1, 5, 2, 1);
         //GridPane.setHalignment(storeButton, HPos.CENTER);
         GridPane.setMargin(storeDeadDropButton, new Insets(20, 0, 20, 0));
+
+        // Add config Button
+        Button gotoConfigButton = new Button("Config");
+        gotoConfigButton.setPrefHeight(40);
+        //createNewAccountButton.setDefaultButton(true);
+        gotoConfigButton.setPrefWidth(70);
+        gridPane.add(gotoConfigButton, 6, 6, 1, 1);
+        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
+        GridPane.setMargin(gotoConfigButton, new Insets(20, 0, 20, 0));
+
+        gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               // if (messField.getText().isEmpty()) {
+               //     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
+              //      return;
+               // }
+                gridPane.getChildren().clear();
+                configSceneElements(gridPane);
+                //call encrypt and save message
+               // ObservableList<CharSequence> paragraph = messField.getParagraphs();
+               // IOLocalController.storeMessage(paragraph);
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
+            }
+        });
 
 
         storeButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -305,61 +326,99 @@ public class View {
         GridPane.setHalignment(headerLabel, HPos.CENTER);
         GridPane.setMargin(headerLabel, new Insets(20, 0, 20, 0));
 
-        // Add Name Label
+        // Add protocol Label and field
         Label protocolLabel = new Label("Protocol : ");
         gridPane.add(protocolLabel, 0, 1);
-
-        // Add Name Text Field
-        //TextField nameField = new TextField();
         protocolField.setPrefHeight(40);
         gridPane.add(protocolField, 1, 1);
+        protocolField.setText(controller.getProtocol());
         protocolField.textProperty().addListener((obs, oldText, newText) -> controller.updateProtocol(newText));
 
-
-        // Add Name Label
-        Label baseUrlLabel = new Label("Protocol : ");
-        gridPane.add(baseUrlLabel, 0, 1);
-
-        // Add Name Text Field
-        //TextField nameField = new TextField();
+        // Add base url Label and field
+        Label baseUrlLabel = new Label("Base URL : ");
+        gridPane.add(baseUrlLabel, 0, 2);
         baseUrlField.setPrefHeight(40);
-        gridPane.add(baseUrlField, 1, 1);
+        gridPane.add(baseUrlField, 1, 2);
+        baseUrlField.setText(controller.getBaseUrl());
         baseUrlField.textProperty().addListener((obs, oldText, newText) -> controller.updateBaseUrl(newText));
 
-
-        // Add Name Label
-        Label idUrlLabel = new Label("Protocol : ");
-        gridPane.add(idUrlLabel, 0, 1);
-
-        // Add Name Text Field
-        //TextField nameField = new TextField();
+        // Add id url Label and field
+        Label idUrlLabel = new Label("ID URL : ");
+        gridPane.add(idUrlLabel, 0, 3);
         idUrlField.setPrefHeight(40);
-        gridPane.add(idUrlField, 1, 1);
+        gridPane.add(idUrlField, 1, 3);
+        idUrlField.setText(controller.getIdUrl());
         idUrlField.textProperty().addListener((obs, oldText, newText) -> controller.updateIdUrl(newText));
 
-
-        // Add login Button
-        Button loginButton = new Button("Login");
-        loginButton.setPrefHeight(40);
-        //loginButton.setDefaultButton(true);
-        loginButton.setPrefWidth(100);
-        gridPane.add(loginButton, 1, 4, 2, 1);
-        //GridPane.setHalignment(loginButton, HPos.CENTER);
-        GridPane.setMargin(loginButton, new Insets(20, 0, 20, 0));
-
-        // Add new account Button
-        Button createNewAccountButton = new Button("Create New");
-        createNewAccountButton.setPrefHeight(40);
+        // Add get new id Button
+        Button getNewIdButton = new Button("Get New");
+        getNewIdButton.setPrefHeight(40);
         //createNewAccountButton.setDefaultButton(true);
-        createNewAccountButton.setPrefWidth(100);
-        gridPane.add(createNewAccountButton, 0, 4, 2, 1);
+        getNewIdButton.setPrefWidth(70);
+        gridPane.add(getNewIdButton, 6, 3, 1, 1);
         //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
-        GridPane.setMargin(createNewAccountButton, new Insets(20, 0, 20, 0));
+        GridPane.setMargin(getNewIdButton, new Insets(20, 0, 20, 0));
 
-        createNewAccountButton.setOnAction(new EventHandler<ActionEvent>() {
+        // Add exit config Button
+        Button gotoConfigButton = new Button("Back");
+        gotoConfigButton.setPrefHeight(40);
+        //createNewAccountButton.setDefaultButton(true);
+        gotoConfigButton.setPrefWidth(70);
+        gridPane.add(gotoConfigButton, 6, 6, 1, 1);
+        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
+        GridPane.setMargin(gotoConfigButton, new Insets(20, 0, 20, 0));
+
+        // Add save config Button
+        Button saveConfigButton = new Button("Save Config");
+        saveConfigButton.setPrefHeight(40);
+        //createNewAccountButton.setDefaultButton(true);
+        saveConfigButton.setPrefWidth(100);
+        gridPane.add(saveConfigButton, 1, 6, 1, 1);
+        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
+        GridPane.setMargin(saveConfigButton, new Insets(20, 0, 20, 0));
+
+
+        gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                //todo: check password quality
+                // if (messField.getText().isEmpty()) {
+                //     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
+                //      return;
+                // }
+                gridPane.getChildren().clear();
+                messageSceneElements(gridPane);
+                //call encrypt and save message
+                // ObservableList<CharSequence> paragraph = messField.getParagraphs();
+                // IOLocalController.storeMessage(paragraph);
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
+            }
+        });
+        getNewIdButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+              /*  //todo: check password quality
+                if (nameField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
+                    return;
+                }
+                if (passwordField.getText().isEmpty()) {
+                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
+                    return;
+                }
+
+                //call storeAccount and go to next scene
+                //todo: storeAccount() should return true if successfully created .acc files*/
+
+                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
+                //gridPane.getChildren().clear();
+                //messageSceneElements(gridPane);
+
+            }
+    });
+        saveConfigButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+              /*  //todo: check password quality
                 if (nameField.getText().isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
                     return;
@@ -374,31 +433,12 @@ public class View {
                 ioLocalController.storeAccount();
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
                 gridPane.getChildren().clear();
-                messageSceneElements(gridPane);
+                messageSceneElements(gridPane);*/
+                ioLocalController.storeConfig();
 
             }
         });
 
-        loginButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (nameField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
-                    return;
-                }
-                if (passwordField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
-                    return;
-                }
-
-                //if found matching account login/password then go to next scene
-                if (ioLocalController.retrieveAccount()) {
-                    //showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Login", "Welcome " + nameField.getText());
-                    gridPane.getChildren().clear();
-                    messageSceneElements(gridPane);
-                }
-            }
-        });
     }
 
     public static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {

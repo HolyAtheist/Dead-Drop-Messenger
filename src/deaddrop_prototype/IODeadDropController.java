@@ -39,9 +39,9 @@ public class IODeadDropController {
         SecretKey passSecretKey;
         byte[] encryptedMessage = null;
 
-        String protocol = "https://";
-        String baseUrl = "jsonblob.com/api/jsonBlob/";
-        String idUrl = "23990876-7cc3-11ea-8070-5741ae0a9329";
+        String protocol = model.getProtocol(); //"https://";
+        String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
+        String idUrl = model.getIdUrl(); //"23990876-7cc3-11ea-8070-5741ae0a9329";
 
         ////encrypt message
 
@@ -61,9 +61,8 @@ public class IODeadDropController {
             e.printStackTrace();
         }
 
-        //prepare data and write files .iv and encrypted .aes
+        //prepare data and build json with encrypted data
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
-        //byte[] iv = Base64.toBase64String(generatedIV).getBytes();
 
         JsonObject value = Json.createObjectBuilder()
                 .add("name", stringNameHashCalculated)
@@ -82,7 +81,6 @@ public class IODeadDropController {
     }
 
 
-
     static void retrieveMessageDeadDrop() {
         //load and decrypt message for current account
 
@@ -94,28 +92,21 @@ public class IODeadDropController {
         SecretKey passSecretKey;
         byte[] decryptedBytes = new byte[0];
 
-        String protocol = "https://";
-        String baseUrl = "jsonblob.com/api/jsonBlob/";
-        String idUrl = "23990876-7cc3-11ea-8070-5741ae0a9329";
+        String protocol = model.getProtocol(); //"https://";
+        String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
+        String idUrl = model.getIdUrl(); //"23990876-7cc3-11ea-8070-5741ae0a9329";
 
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol+baseUrl+idUrl); //build url
-        //String stringtest = target.toString();
-        Response response = target.request(MediaType.APPLICATION_JSON_TYPE).get(); //GET the url
+        Response response = target.request(MediaType.APPLICATION_JSON_TYPE).get(); //GET the url and store response
 
-        //int status = response.getStatus();
-        JsonObject str2 = response.readEntity(JsonObject.class); //get response json data
+        JsonObject str2 = response.readEntity(JsonObject.class); //parse response json data
 
+        //if code 200/ok, try to get encrypted data and decrypt
         if (response.getStatus()==200) {
             String name = str2.getString("name");
             String iv = str2.getString("iv");
             String aes = str2.getString("aes");
-
-            //read .iv and .aes files in current account
-            //   String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
-            //   byte[] readIV = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".iv"));
-            //   byte[] readEncryptedMessage = Base64.decode(FileUtils.readAllBytes(stringNameHashCalculated + ".aes"));
-
 
             byte[] readIV = Base64.decode(iv);
             byte[] readEncryptedMessage = Base64.decode(aes);

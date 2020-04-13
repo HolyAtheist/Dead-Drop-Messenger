@@ -1,6 +1,8 @@
 package deaddrop_prototype;
 
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.io.File;
 import java.util.ArrayList;
@@ -14,8 +16,9 @@ public class FileUtils {
         byte[] bytesRead = {};
         try {
             bytesRead = Files.readAllBytes(Paths.get(inputFile));
-        } catch (Exception e) {
-            e.printStackTrace();
+        }  catch (IOException e) {
+            //System.out.println(inputFile);
+            //e.printStackTrace();
         }
         return bytesRead;
     }
