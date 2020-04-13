@@ -55,4 +55,12 @@ public class Controller {
     public String getIdUrl() {
         return model.getIdUrl();
     }
+
+    public String getIdHeader() {
+        return model.getIdHeader();
+    }
+
+    public void updateIdHeader(String newText) {
+        model.setIdHeader(newText);
+    }
 }
