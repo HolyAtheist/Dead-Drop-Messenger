@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sec" level="application" />
+    <orderEntry type="library" name="jaxrs" level="project" />
   </component>
 </module>
