@@ -36,6 +36,7 @@ public class IODeadDropController {
         SecretKey passSecretKey;
         byte[] encryptedMessage;
 
+        // note: the only website supported/tested for now is jsonblob.com
         String protocol = model.getProtocol(); //"https://";
         String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
         String idUrl = model.getIdUrl(); //"23990876-7cc3-11ea-8070-5741ae0a9329";
@@ -46,7 +47,7 @@ public class IODeadDropController {
         byte[] generatedIV = CryptUtils.generateSecureIV();
         IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
-        //get SecretKey
+        //calculate SecretKey
         passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         //do encryption
@@ -56,9 +57,9 @@ public class IODeadDropController {
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
 
         JsonObject value = Json.createObjectBuilder()
-                .add("name", stringNameHashCalculated)
-                .add("iv", Base64.toBase64String(generatedIV))
-                .add("aes", Base64.toBase64String(Objects.requireNonNull(encryptedMessage))).build();
+                .add(model.deaddropNameJsonName, stringNameHashCalculated)
+                .add(model.deaddropIVJsonName, Base64.toBase64String(generatedIV))
+                .add(model.deaddropEncryptedJsonName, Base64.toBase64String(Objects.requireNonNull(encryptedMessage))).build();
 
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol + baseUrl + idUrl); //build url
@@ -83,6 +84,7 @@ public class IODeadDropController {
         SecretKey passSecretKey;
         byte[] decryptedBytes;
 
+        // note: the only website supported/tested for now is jsonblob.com
         String protocol = model.getProtocol(); //"https://";
         String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
         String idUrl = model.getIdUrl(); //"23990876-7cc3-11ea-8070-5741ae0a9329";
@@ -95,9 +97,9 @@ public class IODeadDropController {
 
         //if code 200/ok, try to get encrypted data and decrypt
         if (response.getStatus() == 200) {
-            String name = str2.getString("name");
-            String iv = str2.getString("iv");
-            String aes = str2.getString("aes");
+            String name = str2.getString(model.deaddropNameJsonName);
+            String iv = str2.getString(model.deaddropIVJsonName);
+            String aes = str2.getString(model.deaddropEncryptedJsonName);
 
             byte[] readIV = new byte[0];
             byte[] readEncryptedMessage = new byte[0];
@@ -131,14 +133,16 @@ public class IODeadDropController {
 
     static void getNewId() {
         //this method tries to get a new id -- the path to specific data on jsonblob
+        // == a path to a new deaddrop
+        // note: the only website supported/tested for now is jsonblob.com
         String protocol = model.getProtocol(); //"https://";
         String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
         String idHeader = model.getIdHeader(); //  X-jsonblob
 
         JsonObject value = Json.createObjectBuilder()
-                .add("name", "dummyname")
-                .add("iv", "dummy")
-                .add("aes", "dummy").build();
+                .add(model.deaddropNameJsonName, "dummyname")
+                .add(model.deaddropIVJsonName, "dummyiv")
+                .add(model.deaddropEncryptedJsonName, "dummyaes").build();
 
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol + baseUrl); //build url

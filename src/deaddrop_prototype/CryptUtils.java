@@ -1,6 +1,5 @@
 package deaddrop_prototype;
 
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -8,7 +7,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
 public class CryptUtils {
-    //helper class for de/encrypt
+    //// helper class for de/encrypt
 
     protected static byte[] generateSecureIV() {
         SecureRandom secureRandom = null;
@@ -60,6 +59,6 @@ public class CryptUtils {
         return null;
     }
 
-    }
+}
 
 
