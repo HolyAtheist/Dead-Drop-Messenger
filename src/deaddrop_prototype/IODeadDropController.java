@@ -29,8 +29,8 @@ public class IODeadDropController {
 
         char[] nameBytes = model.getName().toCharArray();
         char[] passBytes = model.getPass().toCharArray();
-        byte[] passSalt = model.getNameSalt();
-        byte[] nameSalt = model.getPassSalt();
+        byte[] passSalt = model.getPassSalt();
+        byte[] nameSalt = model.getNameSalt();
 
         SecretKey passSecretKey;
         byte[] encryptedMessage;
@@ -79,8 +79,8 @@ public class IODeadDropController {
 
         char[] nameBytes = model.getName().toCharArray();
         char[] passBytes = model.getPass().toCharArray();
-        byte[] passSalt = model.getNameSalt();
-        byte[] nameSalt = model.getPassSalt();
+        byte[] passSalt = model.getPassSalt();
+        byte[] nameSalt = model.getNameSalt();
 
         SecretKey passSecretKey;
         byte[] decryptedBytes;
