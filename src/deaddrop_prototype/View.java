@@ -1,12 +1,10 @@
 package deaddrop_prototype;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
@@ -19,7 +17,6 @@ import javafx.stage.Window;
 public class View {
     private static GridPane gridPane;
     private static TextArea messField = new TextArea();
-    //private static TextArea statusField = new TextArea();
     private static TextField nameField = new TextField();
     private static PasswordField passwordField = new PasswordField();
 
@@ -27,14 +24,16 @@ public class View {
     private static IOLocalController ioLocalController;
     private static IODeadDropController ioDeadDropController;
 
-    private static TextField protocolField= new TextField();
-    private static TextField baseUrlField= new TextField();
-    private static TextField idUrlField= new TextField();
-    private static TextField idHeaderField= new TextField();
+    private static TextField protocolField = new TextField();
+    private static TextField baseUrlField = new TextField();
+    private static TextField idUrlField = new TextField();
+    private static TextField idHeaderField = new TextField();
 
     private Model model;
 
     public View(Controller controller1, IOLocalController controller2, IODeadDropController controller3, Model model) {
+
+        //// note: some of the View class is based on the example from https://www.callicoder.com/javafx-registration-form-gui-tutorial/
 
         this.controller = controller1;
         this.ioLocalController = controller2;
@@ -50,6 +49,7 @@ public class View {
         return gridPane;
     }
 
+    //// setup various defaults
     public static GridPane createDefaultFormPane() {
         // Instantiate a new Grid Pane
         gridPane = new GridPane();
@@ -81,6 +81,7 @@ public class View {
         return gridPane;
     }
 
+    //// the login view
     public static void loginSceneElements(GridPane gridPane) {
         // Add Header
         Label headerLabel = new Label("Login or Create new account");
@@ -94,18 +95,15 @@ public class View {
         gridPane.add(nameLabel, 0, 1);
 
         // Add Name Text Field
-        //TextField nameField = new TextField();
         nameField.setPrefHeight(40);
         gridPane.add(nameField, 1, 1);
         nameField.textProperty().addListener((obs, oldText, newText) -> controller.updateName(newText));
-
 
         // Add Password Label
         Label passwordLabel = new Label("Password : ");
         gridPane.add(passwordLabel, 0, 3);
 
         // Add Password Field
-        //PasswordField passwordField = new PasswordField();
         passwordField.setPrefHeight(40);
         gridPane.add(passwordField, 1, 3);
         passwordField.textProperty().addListener((obs, oldText, newText) -> controller.updatePass(newText));
@@ -174,6 +172,7 @@ public class View {
         });
     }
 
+    //// the main message view, where user can store, retrieve, go to configure
     public static void messageSceneElements(GridPane gridPane) {
         // Add Header
         Label headerLabel = new Label("Message");
@@ -244,56 +243,42 @@ public class View {
         //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
         GridPane.setMargin(gotoConfigButton, new Insets(20, 0, 20, 0));
 
-        gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {
+        gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {  // 'config' button action
             @Override
             public void handle(ActionEvent event) {
-               // if (messField.getText().isEmpty()) {
-               //     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
-              //      return;
-               // }
                 gridPane.getChildren().clear();
                 configSceneElements(gridPane);
-                //call encrypt and save message
-               // ObservableList<CharSequence> paragraph = messField.getParagraphs();
-               // IOLocalController.storeMessage(paragraph);
-                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
 
-
-        storeButton.setOnAction(new EventHandler<ActionEvent>() {
+        storeButton.setOnAction(new EventHandler<ActionEvent>() {   // encrypt & store message locally
             @Override
             public void handle(ActionEvent event) {
                 if (messField.getText().isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
                     return;
                 }
-
                 //call encrypt and save message
-                ObservableList<CharSequence> paragraph = messField.getParagraphs();
-                IOLocalController.storeMessage(paragraph);
+                ioLocalController.storeMessage();
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
 
-        storeDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {
+        storeDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {   // encrypt & store message in remote deaddrop
             @Override
             public void handle(ActionEvent event) {
                 if (messField.getText().isEmpty()) {
                     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
                     return;
                 }
-
                 //call encrypt and save message
-                //ObservableList<CharSequence> paragraph = messField.getParagraphs();
-                //IONonLocalController.storeMessage(paragraph);
                 ioDeadDropController.storeMessageDeadDrop();
-                statusLabel2.setText(controller.getStatus());
+                statusLabel2.setText(controller.getStatus());   //set the status label
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
 
-        retrieveButton.setOnAction(new EventHandler<ActionEvent>() {
+        retrieveButton.setOnAction(new EventHandler<ActionEvent>() {    // retrieve & decrypt message locally
             @Override
             public void handle(ActionEvent event) {
                 //call retrieve and decrypt message
@@ -302,23 +287,20 @@ public class View {
             }
         });
 
-        retrieveDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {
+        retrieveDeadDropButton.setOnAction(new EventHandler<ActionEvent>() {    // retrieve & decrypt message from deaddrop
             @Override
             public void handle(ActionEvent event) {
                 //call retrieve and decrypt message
-                //messField.setText(IONonLocalController.retrieveMessage());
-                //IONonLocalController.retrieveMessage();
                 ioDeadDropController.retrieveMessageDeadDrop();
                 messField.setText(controller.getMess());
-                statusLabel2.setText(controller.getStatus());
-
+                statusLabel2.setText(controller.getStatus());   //set the status label
                 // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "retrieve", "retrieved");
             }
         });
 
     }
 
-
+    //// the configuration view
     public static void configSceneElements(GridPane gridPane) {
         // Add Header
         Label headerLabel = new Label("Dead Drop Configuration");
@@ -362,95 +344,49 @@ public class View {
         // Add get new id Button
         Button getNewIdButton = new Button("Get New");
         getNewIdButton.setPrefHeight(40);
-        //createNewAccountButton.setDefaultButton(true);
         getNewIdButton.setPrefWidth(70);
         gridPane.add(getNewIdButton, 6, 3, 1, 1);
-        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
         GridPane.setMargin(getNewIdButton, new Insets(20, 0, 20, 0));
 
         // Add exit config Button
-        Button gotoConfigButton = new Button("Back");
-        gotoConfigButton.setPrefHeight(40);
-        //createNewAccountButton.setDefaultButton(true);
-        gotoConfigButton.setPrefWidth(70);
-        gridPane.add(gotoConfigButton, 6, 6, 1, 1);
-        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
-        GridPane.setMargin(gotoConfigButton, new Insets(20, 0, 20, 0));
+        Button gotoMessageViewButton = new Button("Back");
+        gotoMessageViewButton.setPrefHeight(40);
+        gotoMessageViewButton.setPrefWidth(70);
+        gridPane.add(gotoMessageViewButton, 6, 6, 1, 1);
+        GridPane.setMargin(gotoMessageViewButton, new Insets(20, 0, 20, 0));
 
         // Add save config Button
         Button saveConfigButton = new Button("Save Config");
         saveConfigButton.setPrefHeight(40);
-        //createNewAccountButton.setDefaultButton(true);
         saveConfigButton.setPrefWidth(100);
         gridPane.add(saveConfigButton, 1, 6, 1, 1);
-        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
         GridPane.setMargin(saveConfigButton, new Insets(20, 0, 20, 0));
 
 
-        gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {
+        gotoMessageViewButton.setOnAction(new EventHandler<ActionEvent>() {  // change view back to message view
             @Override
             public void handle(ActionEvent event) {
-                // if (messField.getText().isEmpty()) {
-                //     showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter message");
-                //      return;
-                // }
                 gridPane.getChildren().clear();
                 messageSceneElements(gridPane);
-                //call encrypt and save message
-                // ObservableList<CharSequence> paragraph = messField.getParagraphs();
-                // IOLocalController.storeMessage(paragraph);
-                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "mess saved", "mess saved");
             }
         });
-        getNewIdButton.setOnAction(new EventHandler<ActionEvent>() {
+        getNewIdButton.setOnAction(new EventHandler<ActionEvent>() { // get new id button action
             @Override
             public void handle(ActionEvent event) {
-              /*  //todo: check password quality
-                if (nameField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
-                    return;
-                }
-                if (passwordField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
-                    return;
-                }
-
-                //call storeAccount and go to next scene
-                //todo: storeAccount() should return true if successfully created .acc files*/
-                ioDeadDropController.getNewId();
+                ioDeadDropController.getNewId();    // getNewId() tries to get a new id -- a new deaddrop -- for the configured site
                 idUrlField.setText(controller.getIdUrl());
-                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
-                //gridPane.getChildren().clear();
-                //messageSceneElements(gridPane);
-
             }
-    });
-        saveConfigButton.setOnAction(new EventHandler<ActionEvent>() {
+        });
+        saveConfigButton.setOnAction(new EventHandler<ActionEvent>() { // save config button action
             @Override
             public void handle(ActionEvent event) {
-              /*  //todo: check password quality
-                if (nameField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter your name");
-                    return;
-                }
-                if (passwordField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.ERROR, gridPane.getScene().getWindow(), "Form Error!", "Please enter a password");
-                    return;
-                }
-
-                //call storeAccount and go to next scene
-                //todo: storeAccount() should return true if successfully created .acc files
-                ioLocalController.storeAccount();
-                // showAlert(Alert.AlertType.CONFIRMATION, gridPane.getScene().getWindow(), "Account created", "Welcome " + nameField.getText());
-                gridPane.getChildren().clear();
-                messageSceneElements(gridPane);*/
                 ioLocalController.storeConfig();
-
             }
         });
 
     }
 
+    //// alert popup method
     public static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

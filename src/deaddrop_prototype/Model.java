@@ -3,6 +3,7 @@ package deaddrop_prototype;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+//// data we need to store
 public class Model {
 
     private StringProperty name = new SimpleStringProperty();
@@ -38,7 +39,7 @@ public class Model {
     }
 
 
-    ///conf
+    ///config data
     private StringProperty protocol = new SimpleStringProperty();
     public final StringProperty protocolProperty() {
         return this.protocol;
@@ -88,17 +89,23 @@ public class Model {
     public final void setStatus(String name) { this.statusProperty().set(name); }
 
 
-    // public final ObservableList<CharSequence> getMessage() {
-   //     return this.message;
-   // }
+    //constant strings
+    static final String configProtocolJsonName = "protocol";
+    static final String configBaseUrlJsonName = "baseurl";
+    static final String configIdUrlJsonName = "idurl";
+    static final String configIdHeaderJsonName = "idheader";
 
-   // public final void setMessage(ObservableList<CharSequence> msg) {
-   //     this.message = msg;
-   // }
+    static final String deaddropNameJsonName = "name";
+    static final String deaddropIVJsonName = "iv";
+    static final String deaddropEncryptedJsonName = "aes";
 
-   // public final byte[] getMessageBytes() {
-       // return String.join("\n", this.getMessage()).getBytes();
-  //  }
+    static final String configFilenameIVExtension = "civ";
+    static final String configFilenameConfigExtension = "con";
+
+    static final String accountFilenameExtension = "acc";
+
+    static final String messageFilenameIVExtension = "iv";
+    static final String messageFilenameEncryptedExtension = "aes";
 
 
 }

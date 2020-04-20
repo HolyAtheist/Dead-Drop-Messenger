@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class FileUtils {
-//helper class as given by niels
+//helper class as given by Niels
     // readAllBytes:
     // The method merely hides the use of Paths.
 

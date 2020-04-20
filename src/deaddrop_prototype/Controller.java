@@ -1,10 +1,11 @@
 package deaddrop_prototype;
 
+//// basic getter-setter controller
 public class Controller {
-    private static Model model ;
+    private static Model model;
 
     public Controller(Model model) {
-        this.model = model ;
+        this.model = model;
     }
 
     public void updateName(String name) {
