@@ -114,16 +114,13 @@ public class View {
         //loginButton.setDefaultButton(true);
         loginButton.setPrefWidth(100);
         gridPane.add(loginButton, 1, 4, 2, 1);
-        //GridPane.setHalignment(loginButton, HPos.CENTER);
         GridPane.setMargin(loginButton, new Insets(20, 0, 20, 0));
 
         // Add new account Button
         Button createNewAccountButton = new Button("Create New");
         createNewAccountButton.setPrefHeight(40);
-        //createNewAccountButton.setDefaultButton(true);
         createNewAccountButton.setPrefWidth(100);
         gridPane.add(createNewAccountButton, 0, 4, 2, 1);
-        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
         GridPane.setMargin(createNewAccountButton, new Insets(20, 0, 20, 0));
 
         createNewAccountButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -190,7 +187,6 @@ public class View {
         gridPane.add(statusLabel, 0, 6);
         Label statusLabel2 = new Label("");
         gridPane.add(statusLabel2, 1, 6);
-        //statusLabel2.textProperty()
 
         // Add message Text Field
         messField.setPrefHeight(200);
@@ -201,46 +197,36 @@ public class View {
         // Add retrieve Button
         Button retrieveButton = new Button("Retrieve locally");
         retrieveButton.setPrefHeight(40);
-        // retrieveButton.setDefaultButton(true);
         retrieveButton.setPrefWidth(100);
         gridPane.add(retrieveButton, 0, 4, 2, 1);
-        //GridPane.setHalignment(retrieveButton, HPos.CENTER);
         GridPane.setMargin(retrieveButton, new Insets(20, 0, 20, 0));
 
-        // Add retrieve Button
+        // Add retrieve dead drop Button
         Button retrieveDeadDropButton = new Button("Retrieve from dead drop");
         retrieveDeadDropButton.setPrefHeight(40);
-        // retrieveButton.setDefaultButton(true);
         retrieveDeadDropButton.setPrefWidth(150);
         gridPane.add(retrieveDeadDropButton, 0, 5, 2, 1);
-        //GridPane.setHalignment(retrieveButton, HPos.CENTER);
         GridPane.setMargin(retrieveDeadDropButton, new Insets(20, 0, 20, 0));
 
         // Add store Button
         Button storeButton = new Button("Store locally");
         storeButton.setPrefHeight(40);
-        //storeButton.setDefaultButton(true);
         storeButton.setPrefWidth(100);
         gridPane.add(storeButton, 1, 4, 2, 1);
-        //GridPane.setHalignment(storeButton, HPos.CENTER);
         GridPane.setMargin(storeButton, new Insets(20, 0, 20, 0));
 
-        // Add store Button
+        // Add store dead drop Button
         Button storeDeadDropButton = new Button("Store in dead drop");
         storeDeadDropButton.setPrefHeight(40);
-        //storeButton.setDefaultButton(true);
         storeDeadDropButton.setPrefWidth(150);
         gridPane.add(storeDeadDropButton, 1, 5, 2, 1);
-        //GridPane.setHalignment(storeButton, HPos.CENTER);
         GridPane.setMargin(storeDeadDropButton, new Insets(20, 0, 20, 0));
 
         // Add config Button
         Button gotoConfigButton = new Button("Config");
         gotoConfigButton.setPrefHeight(40);
-        //createNewAccountButton.setDefaultButton(true);
         gotoConfigButton.setPrefWidth(70);
         gridPane.add(gotoConfigButton, 6, 6, 1, 1);
-        //GridPane.setHalignment(createNewAccountButton, HPos.CENTER);
         GridPane.setMargin(gotoConfigButton, new Insets(20, 0, 20, 0));
 
         gotoConfigButton.setOnAction(new EventHandler<ActionEvent>() {  // 'config' button action
@@ -387,6 +373,7 @@ public class View {
     }
 
     //// alert popup method
+    //// note: based on the example from https://www.callicoder.com/javafx-registration-form-gui-tutorial/
     public static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

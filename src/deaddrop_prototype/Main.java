@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         java.security.Security.addProvider(
                 new org.bouncycastle.jce.provider.BouncyCastleProvider());
         Model model = new Model();
@@ -16,13 +16,13 @@ public class Main extends Application {
         IODeadDropController ioDeadDropController = new IODeadDropController(model);
         View view = new View(controller, ioLocalController, ioDeadDropController, model);
 
-        primaryStage.setTitle("Startup Screen");
+        primaryStage.setTitle("DDM");
 
         // Create a scene with registration form grid pane as the root node
-        Scene messStartup = new Scene(view.asParent(), 800, 500);
+        Scene ddmStartup = new Scene(view.asParent(), 800, 500);
 
         // Set the scene in primary stage
-        primaryStage.setScene(messStartup);
+        primaryStage.setScene(ddmStartup);
 
         primaryStage.show();
     }
