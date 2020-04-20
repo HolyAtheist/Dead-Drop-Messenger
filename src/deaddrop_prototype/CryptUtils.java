@@ -39,7 +39,7 @@ public class CryptUtils {
         //using Password-Based Key Derivation Function 2
         //basically as written on the slides
 
-        var iterations = 5000; //hardcoded for now, could be settings
+        var iterations = 5000; //hardcoded for now, could be part of settings
         var keyLen = 128;
 
         try {

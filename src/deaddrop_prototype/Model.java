@@ -68,8 +68,10 @@ public class Model {
     public final String getIdHeader() { return this.idHeaderProperty().get(); }
     public final void setIdHeader(String name) { this.idHeaderProperty().set(name); }
 
-    //encryption method
-    //iterations
+    ///things that could also be part of settings/config:
+    //  encryption method
+    //  iterations
+    //  etc
     ///
 
 
@@ -89,7 +91,7 @@ public class Model {
     public final void setStatus(String name) { this.statusProperty().set(name); }
 
 
-    //constant strings
+    // string constants for file extensions and json labels etc
     static final String configProtocolJsonName = "protocol";
     static final String configBaseUrlJsonName = "baseurl";
     static final String configIdUrlJsonName = "idurl";

@@ -56,7 +56,7 @@ public class IOLocalController {
     static void storeMessage() {
         //encrypt and save message
 
-        //need to join charsequence list with newlines in between
+        //need to join charsequence list with newlines in between when getting text from javafx TextArea
         byte[] textArea = String.join("\n", Controller.getMess()).getBytes();
 
         char[] nameBytes = model.getName().toCharArray();
@@ -69,11 +69,11 @@ public class IOLocalController {
 
         ////encrypt message
 
-        //get random iv
+        //get new random iv
         byte[] generatedIV = CryptUtils.generateSecureIV();
         IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
-        //get SecretKey
+        //calculate SecretKey
         passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         //do encryption
@@ -108,7 +108,7 @@ public class IOLocalController {
         byte[] passSaltRetrieved;
         byte[] nameSaltRetrieved;
 
-        boolean check = false;
+        boolean check = false; // will be true if matching account was found; false if no account found
 
         //get all files with extension .acc
         String currentDirectory = System.getProperty("user.dir");
@@ -141,8 +141,8 @@ public class IOLocalController {
                     MessageDigest
                             .isEqual(Hex.toHexString(stringPassHashCalculated.getBytes()).getBytes(),
                                     stringPassHashRetrieved.getBytes())) {
-                //if login/password matched
-                //store retrieved salts in model for later enc/dec
+                //if login/password matched with stored account
+                //then store retrieved salts in model for later enc/dec
                 model.setNameSalt(nameSaltRetrieved);
                 model.setPassSalt(passSaltRetrieved);
 
@@ -151,11 +151,13 @@ public class IOLocalController {
         }
         //return true if (at least one) account matched
         return check;
-
     }
 
+
     static void storeAccount() {
-        //create a new account
+        //create and save a new account
+        // accounts are stored in an .acc file with hashed name/login as filename
+        // and hashed password and salts in the file
         char[] nameBytes = model.getName().toCharArray();
         char[] passBytes = model.getPass().toCharArray();
         byte[] passSalt = null;
@@ -163,14 +165,14 @@ public class IOLocalController {
         String stringPassHash = null;
         String stringNameHash = null;
 
-        //get random salts
+        //get new random salts
         try {
             SecureRandom secureRandom = SecureRandom.getInstance("DEFAULT", "BC");
             passSalt = new byte[32];
             secureRandom.nextBytes(passSalt);
             nameSalt = new byte[32];
             secureRandom.nextBytes(nameSalt);
-            //store salts in model for later enc/dec
+            //store salts in model for later encryption/decryption
             model.setNameSalt(nameSalt);
             model.setPassSalt(passSalt);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -205,10 +207,18 @@ public class IOLocalController {
         SecretKey passSecretKey;
         byte[] encryptedMessage;
 
-        if (model.getIdUrl().getBytes() == null) { model.setIdUrl("");}
-        if (model.getProtocol().getBytes() == null) { model.setProtocol("");}
-        if (model.getBaseUrl().getBytes() == null) { model.setBaseUrl("");}
-        if (model.getIdHeader().getBytes() == null) { model.setIdHeader("");}
+        if (model.getIdUrl().getBytes() == null) {
+            model.setIdUrl("");
+        }
+        if (model.getProtocol().getBytes() == null) {
+            model.setProtocol("");
+        }
+        if (model.getBaseUrl().getBytes() == null) {
+            model.setBaseUrl("");
+        }
+        if (model.getIdHeader().getBytes() == null) {
+            model.setIdHeader("");
+        }
 
         JsonObject jsonConfig = Json.createObjectBuilder()
                 .add(model.configProtocolJsonName, Base64.toBase64String(model.getProtocol().getBytes()))
@@ -218,11 +228,11 @@ public class IOLocalController {
 
         ////encrypt message
 
-        //get random iv
+        //get new random iv
         byte[] generatedIV = CryptUtils.generateSecureIV();
         IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
-        //get SecretKey
+        //calculate SecretKey
         passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
         byte[] data = jsonConfig.toString().getBytes();
@@ -251,11 +261,11 @@ public class IOLocalController {
         byte[] passSalt = model.getPassSalt();
 
         SecretKey passSecretKey;
-        byte[] decryptedBytes = new byte[0];
+        byte[] decryptedBytes;
 
         //try to get config files
-        byte[] readIV = new byte[0];
-        byte[] readEncryptedMessage = new byte[0];
+        byte[] readIV;
+        byte[] readEncryptedMessage;
 
         //read .civ and .con files (encrypted configuration) in current account
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
@@ -266,10 +276,10 @@ public class IOLocalController {
         //proceed if it appears we got iv
         if (readIV != null && readIV.length == 16) {
 
-            //get SecretKey
+            //calculate SecretKey
             passSecretKey = Objects.requireNonNull(CryptUtils.getPBKDHashKey(passBytes, passSalt));
 
-            //input iv
+            //retrieved iv
             IvParameterSpec ivParams = new IvParameterSpec(readIV);
 
             //try to do decryption
@@ -277,6 +287,7 @@ public class IOLocalController {
 
             String json = new String(decryptedBytes);
 
+            // parse the json data
             JsonReader jsonReader = Json.createReader(new StringReader(json));
             JsonObject object = jsonReader.readObject();
             jsonReader.close();
@@ -286,6 +297,7 @@ public class IOLocalController {
             String idUrl = new String(Base64.decode(object.getString(model.configIdUrlJsonName)));
             String idHeader = new String(Base64.decode(object.getString(model.configIdHeaderJsonName)));
 
+            // put config data into model
             model.setProtocol(protocol);
             model.setBaseUrl(baseUrl);
             model.setIdUrl(idUrl);

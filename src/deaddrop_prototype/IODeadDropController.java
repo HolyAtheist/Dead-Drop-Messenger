@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public class IODeadDropController {
     private static Model model;
-    //private static Controller controller;
 
     public IODeadDropController(Model model) {
         this.model = model;
@@ -25,7 +24,7 @@ public class IODeadDropController {
     static void storeMessageDeadDrop() {
         //encrypt and save message
 
-        //need to join charsequence list with newlines in between
+        //need to join charsequence list with newlines in between when getting text from javafx TextArea
         byte[] textArea = String.join("\n", Controller.getMess()).getBytes();
 
         char[] nameBytes = model.getName().toCharArray();
@@ -43,7 +42,7 @@ public class IODeadDropController {
 
         ////encrypt message
 
-        //get random iv
+        //get new random iv
         byte[] generatedIV = CryptUtils.generateSecureIV();
         IvParameterSpec ivParams = new IvParameterSpec(generatedIV);
 
@@ -56,11 +55,13 @@ public class IODeadDropController {
         //prepare data and build json with encrypted data
         String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
 
+        //build json data
         JsonObject value = Json.createObjectBuilder()
-                .add(model.deaddropNameJsonName, stringNameHashCalculated)
+                .add(model.deaddropNameJsonName, stringNameHashCalculated) // note: namehash is not currently used, could be used in the future for eg. a simple comparison between account name hashes
                 .add(model.deaddropIVJsonName, Base64.toBase64String(generatedIV))
                 .add(model.deaddropEncryptedJsonName, Base64.toBase64String(Objects.requireNonNull(encryptedMessage))).build();
 
+        // build url and PUT (update) the dead drop data
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol + baseUrl + idUrl); //build url
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
@@ -68,7 +69,7 @@ public class IODeadDropController {
 
         if (response.getStatus() == 200) {
             Controller.updateStatus("Message seems to have been stored ok!");
-        } else Controller.updateStatus("Problem storing message, status code: " + String.valueOf(response.getStatus()));
+        } else Controller.updateStatus("Problem storing message, status code: " + response.getStatus());
 
     }
 
@@ -89,15 +90,16 @@ public class IODeadDropController {
         String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
         String idUrl = model.getIdUrl(); //"23990876-7cc3-11ea-8070-5741ae0a9329";
 
+        //build url and GET from the address
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol + baseUrl + idUrl); //build url
         Response response = target.request(MediaType.APPLICATION_JSON_TYPE).get(); //GET the url and store response
 
         JsonObject str2 = response.readEntity(JsonObject.class); //parse response json data
 
-        //if code 200/ok, try to get encrypted data and decrypt
+        ////if code 200/ok, try to get encrypted data and decrypt
         if (response.getStatus() == 200) {
-            String name = str2.getString(model.deaddropNameJsonName);
+            String name = str2.getString(model.deaddropNameJsonName); // note: name is not currently used, could be used in the future for eg. a simple comparison between account name hashes
             String iv = str2.getString(model.deaddropIVJsonName);
             String aes = str2.getString(model.deaddropEncryptedJsonName);
 
@@ -112,6 +114,7 @@ public class IODeadDropController {
             }
 
             //proceed if it appears we got iv
+            //could of course have more thorough error checking
             if (readIV != null && readIV.length == 16) {
 
                 //get SecretKey
@@ -127,7 +130,7 @@ public class IODeadDropController {
                 Controller.updateMess(new String(decryptedBytes));
             } else Controller.updateStatus("Problem decoding message ");
         } else
-            Controller.updateStatus("Problem retrieving message, status code: " + String.valueOf(response.getStatus()));
+            Controller.updateStatus("Problem retrieving message, status code: " + response.getStatus());
 
     }
 
@@ -139,11 +142,13 @@ public class IODeadDropController {
         String baseUrl = model.getBaseUrl(); //"jsonblob.com/api/jsonBlob/";
         String idHeader = model.getIdHeader(); //  X-jsonblob
 
+        //build dummy json to POST (dummy data could be anything, here follows the layout of the real data)
         JsonObject value = Json.createObjectBuilder()
                 .add(model.deaddropNameJsonName, "dummyname")
                 .add(model.deaddropIVJsonName, "dummyiv")
                 .add(model.deaddropEncryptedJsonName, "dummyaes").build();
 
+        //build url and POST the dummy data
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(protocol + baseUrl); //build url
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
@@ -152,7 +157,6 @@ public class IODeadDropController {
         //if new path created ok, then get the path/blobid
         if (response.getStatus() == 201) {
             model.setIdUrl(response.getHeaderString(idHeader));
-            // System.out.println(response.getHeaderString(idHeader));
         } //else failed
     }
 }
