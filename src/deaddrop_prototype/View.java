@@ -14,6 +14,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Window;
 
+import java.util.Date;
+import java.util.Objects;
+
 public class View {
     private static GridPane gridPane;
     private static TextArea messField = new TextArea();
@@ -73,7 +76,7 @@ public class View {
         columnOneConstraints.setHalignment(HPos.RIGHT);
 
         // columnTwoConstraints will be applied to all the nodes placed in column two.
-        ColumnConstraints columnTwoConstrains = new ColumnConstraints(200, 200, Double.MAX_VALUE);
+        ColumnConstraints columnTwoConstrains = new ColumnConstraints(100, 100, Double.MAX_VALUE);
         columnTwoConstrains.setHgrow(Priority.ALWAYS);
 
         gridPane.getColumnConstraints().addAll(columnOneConstraints, columnTwoConstrains);
@@ -83,29 +86,45 @@ public class View {
 
     //// the login view
     public static void loginSceneElements(GridPane gridPane) {
+
+        // Add TEST1 Button
+        Button testOneButton = new Button("TEST1");
+        testOneButton.setPrefHeight(20);
+        testOneButton.setPrefWidth(60);
+        gridPane.add(testOneButton, 0, 0, 1, 1);
+        GridPane.setMargin(testOneButton, new Insets(20, 0, 20, 0));
+
+        // Add TEST1 Button
+        Button testTwoButton = new Button("TEST2");
+        testTwoButton.setPrefHeight(20);
+        testTwoButton.setPrefWidth(60);
+        gridPane.add(testTwoButton, 1, 0, 1, 1);
+        GridPane.setMargin(testTwoButton, new Insets(20, 0, 20, 0));
+
+
         // Add Header
         Label headerLabel = new Label("Login or Create new account");
         headerLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        gridPane.add(headerLabel, 0, 0, 2, 1);
+        gridPane.add(headerLabel, 1, 1, 2, 1);
         GridPane.setHalignment(headerLabel, HPos.CENTER);
         GridPane.setMargin(headerLabel, new Insets(20, 0, 20, 0));
 
         // Add Name Label
         Label nameLabel = new Label("Name : ");
-        gridPane.add(nameLabel, 0, 1);
+        gridPane.add(nameLabel, 0, 2);
 
         // Add Name Text Field
         nameField.setPrefHeight(40);
-        gridPane.add(nameField, 1, 1);
+        gridPane.add(nameField, 1, 2);
         nameField.textProperty().addListener((obs, oldText, newText) -> controller.updateName(newText));
 
         // Add Password Label
         Label passwordLabel = new Label("Password : ");
-        gridPane.add(passwordLabel, 0, 3);
+        gridPane.add(passwordLabel, 0, 4);
 
         // Add Password Field
         passwordField.setPrefHeight(40);
-        gridPane.add(passwordField, 1, 3);
+        gridPane.add(passwordField, 1, 4);
         passwordField.textProperty().addListener((obs, oldText, newText) -> controller.updatePass(newText));
 
         // Add login Button
@@ -113,15 +132,150 @@ public class View {
         loginButton.setPrefHeight(40);
         //loginButton.setDefaultButton(true);
         loginButton.setPrefWidth(100);
-        gridPane.add(loginButton, 1, 4, 2, 1);
+        gridPane.add(loginButton, 1, 5, 2, 1);
         GridPane.setMargin(loginButton, new Insets(20, 0, 20, 0));
 
         // Add new account Button
         Button createNewAccountButton = new Button("Create New");
         createNewAccountButton.setPrefHeight(40);
         createNewAccountButton.setPrefWidth(100);
-        gridPane.add(createNewAccountButton, 0, 4, 2, 1);
+        gridPane.add(createNewAccountButton, 0, 5, 2, 1);
         GridPane.setMargin(createNewAccountButton, new Insets(20, 0, 20, 0));
+
+
+        testOneButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //test 1 'script'
+                //
+                System.out.println("Test 1 selected..");
+
+                nameField.textProperty().setValue("testname");
+                passwordField.textProperty().setValue("testpassword");
+
+                System.out.println("Inputting name -- " + nameField.getText());
+                System.out.println("Inputting password -- " + passwordField.getText());
+
+                System.out.println("Trying to create account..");
+                // then go to next scene
+                ioLocalController.storeAccount();
+
+                System.out.println("Going to message view...");
+
+                gridPane.getChildren().clear();
+                messageSceneElements(gridPane);
+                System.out.println("Creating account hopefully succeeded.");
+
+                System.out.println("Going to config view...");
+
+                //goto config
+                gridPane.getChildren().clear();
+                configSceneElements(gridPane);
+
+                //input config
+                protocolField.setText("https://");
+                baseUrlField.setText("jsonblob.com/api/jsonBlob/");
+                idHeaderField.setText("X-jsonblob");
+
+                System.out.println("Filling protocol field with -- " + controller.getProtocol());
+                System.out.println("Filling base url field with -- " + controller.getBaseUrl());
+                System.out.println("Filling id header field with -- " + controller.getIdHeader());
+
+                // get new id
+                if (ioDeadDropController.getNewId()) {
+                    System.out.println("Got new id/dead drop url -- " + controller.getIdUrl());
+                    //save config
+                    ioLocalController.storeConfig();
+                    System.out.println("Configuration hopefully saved.");
+                    // go back to message view
+                    System.out.println("Going back to message view...");
+                    gridPane.getChildren().clear();
+                    messageSceneElements(gridPane);
+                    System.out.printf("Setting new message: ");
+
+                    Date date1 = new Date();
+                    String newTest1Message = "Message by TEST ONE -- " + date1;
+                    messField.setText(newTest1Message);
+                    System.out.println(newTest1Message);
+                    // put new message
+
+                    System.out.println("Trying to store new message in dead drop..");
+                    ioDeadDropController.storeMessageDeadDrop();
+
+                    if (Objects.equals(controller.getStatus(), "Message seems to have been stored ok!")) {
+                        // verify message
+                        System.out.println("Message was stored remotely!");
+                    }
+                    System.out.println("Test 1 appears to have succeeded!");
+
+                } else System.out.println("Could not get new id/dead drop :(");
+
+
+            }
+        });
+
+        testTwoButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //test 2 'script'
+                //
+                System.out.println("Test 2 selected..");
+                System.out.println("Inputting name..");
+                nameField.textProperty().setValue("testname");
+                System.out.println("Inputting password..");
+                passwordField.textProperty().setValue("testpassword");
+
+                System.out.println("Trying to log in..");
+                //if found matching account login/password then go to next scene
+                if (ioLocalController.retrieveAccount()) {
+
+                    ioLocalController.retrieveConfig();
+                    gridPane.getChildren().clear();
+                    messageSceneElements(gridPane);
+                    System.out.println("Login succeeded.");
+
+                    //retrieve message from deaddrop
+                    System.out.println("Trying to retrieve encrypted message from remote dead drop...");
+
+                    ioDeadDropController.retrieveMessageDeadDrop();
+                    messField.setText(controller.getMess());
+                    if (Objects.equals(controller.getStatus(), "Message seems to have been retrieved ok!")) {
+                        System.out.println("Message was retrieved!");
+                        System.out.println("Retrieved message content: " + controller.getMess());
+
+                        System.out.printf("Setting new message: ");
+
+                        Date date = new Date();
+                        String newTestMessage = "Message by TEST2 -- " + date;
+                        messField.setText(newTestMessage);
+                        System.out.println(newTestMessage);
+                        // put new message
+
+                        System.out.println("Trying to store new message in dead drop..");
+                        ioDeadDropController.storeMessageDeadDrop();
+
+                        if (Objects.equals(controller.getStatus(), "Message seems to have been stored ok!")) {
+                            // verify message
+                            System.out.println("Message was stored remotely!");
+                            System.out.println("Verifying stored message..");
+
+                            ioDeadDropController.retrieveMessageDeadDrop();
+                            if (Objects.equals(controller.getStatus(), "Message seems to have been retrieved ok!")) {
+                                if (Objects.equals(controller.getMess(), newTestMessage)) {
+                                    System.out.println("Message verified!");
+                                    System.out.println("Test 2 is complete.");
+                                } else System.out.println("Message could not be verified :(");
+                            }
+
+                        } else System.out.println("Could not store message in dead drop :(");
+
+                    } else System.out.println("Could not retrieve message from dead drop :(");
+
+                } else System.out.println("Login failed for some reason.. Are account files in default path?");
+
+            }
+        });
+
 
         createNewAccountButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -328,7 +482,7 @@ public class View {
         idHeaderField.textProperty().addListener((obs, oldText, newText) -> controller.updateIdHeader(newText));
 
         // Add get new id Button
-        Button getNewIdButton = new Button("Get New");
+        Button getNewIdButton = new Button("Get New ID");
         getNewIdButton.setPrefHeight(40);
         getNewIdButton.setPrefWidth(70);
         gridPane.add(getNewIdButton, 6, 3, 1, 1);
@@ -359,8 +513,9 @@ public class View {
         getNewIdButton.setOnAction(new EventHandler<ActionEvent>() { // get new id button action
             @Override
             public void handle(ActionEvent event) {
-                ioDeadDropController.getNewId();    // getNewId() tries to get a new id -- a new deaddrop -- for the configured site
-                idUrlField.setText(controller.getIdUrl());
+                if (ioDeadDropController.getNewId()) {    // getNewId() tries to get a new id -- a new deaddrop -- for the configured site
+                    idUrlField.setText(controller.getIdUrl());
+                }
             }
         });
         saveConfigButton.setOnAction(new EventHandler<ActionEvent>() { // save config button action
