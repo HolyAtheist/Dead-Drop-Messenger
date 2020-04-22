@@ -8,11 +8,11 @@ public class Controller {
         this.model = model;
     }
 
-    public void updateName(String name) {
+    public static void updateName(String name) {
         model.setName(name);
     }
 
-    public void updatePass(String pass) {
+    public static void updatePass(String pass) {
         model.setPass(pass);
     }
 
@@ -28,40 +28,40 @@ public class Controller {
         return model.getMessage();
     }
 
-    public String getStatus() {
+    public static String getStatus() {
         return model.getStatus();
     }
 
 
-    public void updateProtocol(String newText) {
+    public static void updateProtocol(String newText) {
         model.setProtocol(newText);
     }
 
-    public void updateBaseUrl(String newText) {
+    public static void updateBaseUrl(String newText) {
         model.setBaseUrl(newText);
     }
 
-    public void updateIdUrl(String newText) {
+    public static void updateIdUrl(String newText) {
         model.setIdUrl(newText);
     }
 
-    public String getProtocol() {
+    public static String getProtocol() {
         return model.getProtocol();
     }
 
-    public String getBaseUrl() {
+    public static String getBaseUrl() {
         return model.getBaseUrl();
     }
 
-    public String getIdUrl() {
+    public static String getIdUrl() {
         return model.getIdUrl();
     }
 
-    public String getIdHeader() {
+    public static String getIdHeader() {
         return model.getIdHeader();
     }
 
-    public void updateIdHeader(String newText) {
+    public static void updateIdHeader(String newText) {
         model.setIdHeader(newText);
     }
 }

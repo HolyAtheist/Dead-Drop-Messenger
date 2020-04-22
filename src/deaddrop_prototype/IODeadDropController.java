@@ -53,11 +53,11 @@ public class IODeadDropController {
         encryptedMessage = CryptUtils.crypt(textArea, passSecretKey, ivParams, Cipher.ENCRYPT_MODE);
 
         //prepare data and build json with encrypted data
-        String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
+        //String stringNameHashCalculated = Hex.toHexString(Base64.toBase64String(Objects.requireNonNull(CryptUtils.getPBKDHashKey(nameBytes, nameSalt)).getEncoded()).getBytes());
 
         //build json data
         JsonObject value = Json.createObjectBuilder()
-                .add(model.deaddropNameJsonName, stringNameHashCalculated) // note: namehash is not currently used, could be used in the future for eg. a simple comparison between account name hashes
+               // .add(model.deaddropNameJsonName, stringNameHashCalculated) // note: namehash is not currently used, could be used in the future for eg. a simple comparison between account name hashes
                 .add(model.deaddropIVJsonName, Base64.toBase64String(generatedIV))
                 .add(model.deaddropEncryptedJsonName, Base64.toBase64String(Objects.requireNonNull(encryptedMessage))).build();
 
@@ -99,7 +99,7 @@ public class IODeadDropController {
 
         ////if code 200/ok, try to get encrypted data and decrypt
         if (response.getStatus() == 200) {
-            String name = str2.getString(model.deaddropNameJsonName); // note: name is not currently used, could be used in the future for eg. a simple comparison between account name hashes
+           // String name = str2.getString(model.deaddropNameJsonName); // note: name is not currently used, could be used in the future for eg. a simple comparison between account name hashes
             String iv = str2.getString(model.deaddropIVJsonName);
             String aes = str2.getString(model.deaddropEncryptedJsonName);
 
@@ -134,7 +134,7 @@ public class IODeadDropController {
 
     }
 
-    static void getNewId() {
+    static boolean getNewId() {
         //this method tries to get a new id -- the path to specific data on jsonblob
         // == a path to a new deaddrop
         // note: the only website supported/tested for now is jsonblob.com
@@ -144,7 +144,7 @@ public class IODeadDropController {
 
         //build dummy json to POST (dummy data could be anything, here follows the layout of the real data)
         JsonObject value = Json.createObjectBuilder()
-                .add(model.deaddropNameJsonName, "dummyname")
+                //.add(model.deaddropNameJsonName, "dummyname")
                 .add(model.deaddropIVJsonName, "dummyiv")
                 .add(model.deaddropEncryptedJsonName, "dummyaes").build();
 
@@ -157,6 +157,7 @@ public class IODeadDropController {
         //if new path created ok, then get the path/blobid
         if (response.getStatus() == 201) {
             model.setIdUrl(response.getHeaderString(idHeader));
-        } //else failed
+            return true;
+        } else return false;
     }
 }
