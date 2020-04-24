@@ -484,7 +484,7 @@ public class View {
         // Add get new id Button
         Button getNewIdButton = new Button("Get New ID");
         getNewIdButton.setPrefHeight(40);
-        getNewIdButton.setPrefWidth(70);
+        getNewIdButton.setPrefWidth(80);
         gridPane.add(getNewIdButton, 6, 3, 1, 1);
         GridPane.setMargin(getNewIdButton, new Insets(20, 0, 20, 0));
 
